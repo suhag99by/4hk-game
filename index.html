@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF Diamond Top-Up BD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Hind Siliguri', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <span class="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">🔥 FF TopUp BD</span>
+            </div>
+            <div class="flex space-x-2">
+                <button onclick="openTracker()" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-sm font-medium transition">অর্ডার ট্র্যাক</button>
+                <button onclick="openSupportModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-sm font-bold transition">সাপোর্ট</button>
+                <button onclick="openAdmin()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-3 py-1.5 rounded-lg text-sm font-bold transition">অ্যাডমিন প্যানেল</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- Step 1: UID Input -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+            <h2 class="text-lg font-bold text-amber-400 mb-3">১. আপনার গেম ইউআইডি দিন</h2>
+            <input type="text" id="playerUid" placeholder="যেমন: 1234567890" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-amber-500">
+        </section>
+
+        <!-- Step 2: Select Package -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+            <h2 class="text-lg font-bold text-amber-400 mb-3">২. ডায়মন্ড প্যাকেজ সিলেক্ট করুন</h2>
+            <div id="packageContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <!-- Dynamically loaded packages -->
+            </div>
+        </section>
+
+        <!-- Step 3: Payment Method -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
+            <h2 class="text-lg font-bold text-amber-400">৩. পেমেন্ট পদ্ধতি</h2>
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="selectPayment('bKash')" id="btn-bKash" class="payment-btn border border-slate-700 bg-slate-950 p-3 rounded-xl font-bold text-center transition">বিকাশ (bKash)</button>
+                <button onclick="selectPayment('Nagad')" id="btn-Nagad" class="payment-btn border border-slate-700 bg-slate-950 p-3 rounded-xl font-bold text-center transition">নগদ (Nagad)</button>
+                <button onclick="selectPayment('Rocket')" id="btn-Rocket" class="payment-btn border border-slate-700 bg-slate-950 p-3 rounded-xl font-bold text-center transition">রকেট (Rocket)</button>
+            </div>
+
+            <div id="paymentInstructions" class="hidden bg-slate-950 border border-amber-500/30 rounded-xl p-4 text-sm space-y-2">
+                <p class="text-slate-300">দয়া করে নিচের নম্বরে সেন্ড মানি করুন:</p>
+                <div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800">
+                    <span id="targetNumber" class="font-mono font-bold text-amber-400 text-base">01XXXXXXXXX</span>
+                    <button onclick="copyNumber()" class="bg-amber-500 text-slate-950 px-3 py-1 rounded text-xs font-bold">নম্বর কপি</button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <input type="text" id="senderNumber" placeholder="আপনার বিকাশ/নগদ নম্বর (যেখান থেকে পাঠিয়েছেন)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                    <input type="text" id="trxId" placeholder="ট্রানজেকশন আইডি (TrxID)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm uppercase focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+        </section>
+
+        <!-- Submit Button -->
+        <button onclick="submitOrder()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold py-4 rounded-2xl text-lg shadow-lg hover:opacity-95 transition">অর্ডার কনফার্ম করুন</button>
+    </main>
+
+    <!-- Support Modal -->
+    <div id="supportModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-5 space-y-4 text-center">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 class="font-bold text-lg text-emerald-400">কাস্টমার সাপোর্ট</h3>
+                <button onclick="closeSupportModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <p class="text-sm text-slate-300">যেকোনো প্রয়োজনে আমাদের সাথে যোগাযোগ করুন:</p>
+            <div class="space-y-3 pt-2">
+                <a id="whatsappLink" href="#" target="_blank" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition">💬 WhatsApp এ মেসেজ করুন</a>
+                <a id="telegramLink" href="#" target="_blank" class="block w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-xl transition">✈️ Telegram এ যোগাযোগ করুন</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tracker Modal -->
+    <div id="trackerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-5 space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-lg text-amber-400">অর্ডার স্ট্যাটাস চেক করুন</h3>
+                <button onclick="closeTracker()" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <input type="text" id="trackUid" placeholder="আপনার গেম ইউআইডি দিন" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm">
+            <button onclick="checkOrderStatus()" class="w-full bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl">খুঁজুন</button>
+            <div id="trackResult" class="space-y-2 max-h-60 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-xl text-amber-400">অ্যাডমিন ড্যাশবোর্ড</h3>
+                <button onclick="closeAdmin()" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            
+            <div id="adminLoginBox" class="space-y-3">
+                <p class="text-sm text-slate-400">অ্যাডমিন পাসওয়ার্ড দিন (ডিফল্ট: admin123)</p>
+                <input type="password" id="adminPass" placeholder="পাসওয়ার্ড" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm">
+                <button onclick="verifyAdmin()" class="w-full bg-amber-500 text-slate-950 font-bold py-2 rounded-xl">লগইন</button>
+            </div>
+
+            <div id="adminDashboard" class="hidden space-y-5">
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                        <p class="text-xs text-slate-400">মোট অর্ডার</p>
+                        <h4 id="statTotalOrders" class="text-xl font-bold text-amber-400">0</h4>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                        <p class="text-xs text-slate-400">মোট আয়</p>
+                        <h4 id="statTotalIncome" class="text-xl font-bold text-emerald-400">৳0</h4>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                        <p class="text-xs text-slate-400">পেন্ডিং</p>
+                        <h4 id="statPendingOrders" class="text-xl font-bold text-rose-400">0</h4>
+                    </div>
+                </div>
+
+                <!-- Settings: Numbers & Social Links & Password -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <h4 class="font-bold text-sm text-slate-300">সেটিংস ও সোশ্যাল লিংক</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="text" id="editBkash" placeholder="বিকাশ নম্বর" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm">
+                        <input type="text" id="editNagad" placeholder="নগদ নম্বর" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="text" id="editWhatsapp" placeholder="WhatsApp নম্বর/লিংক" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm">
+                        <input type="text" id="editTelegram" placeholder="Telegram ইউজারনেম/লিংক" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm">
+                    </div>
+                    <div class="grid grid-cols-1 gap-3">
+                        <input type="password" id="editAdminPass" placeholder="নতুন অ্যাডমিন পাসওয়ার্ড দিন" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm">
+                    </div>
+                    <button onclick="saveSettings()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-1.5 rounded-lg text-sm">সেটিংস সেভ করুন</button>
+                </div>
+
+                <!-- Package Manager -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <h4 class="font-bold text-sm text-amber-400">ডায়মন্ড প্যাকেজ ম্যানেজমেন্ট (যোগ/দাম পরিবর্তন)</h4>
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="text" id="newPkgName" placeholder="প্যাকেজের নাম (যেমন: 100 Diamonds)" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs col-span-1">
+                        <input type="number" id="newPkgPrice" placeholder="মূল্য (৳)" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs">
+                        <button onclick="addNewPackage()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg text-xs py-2">প্যাকেজ যোগ করুন</button>
+                    </div>
+                    <div id="adminPackageList" class="space-y-2 max-h-40 overflow-y-auto pt-2"></div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-sm text-slate-300">সকল অর্ডার তালিকা</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                            <thead>
+                                <tr class="bg-slate-950 border-b border-slate-800">
+                                    <th class="p-2">UID</th>
+                                    <th class="p-2">প্যাকেজ</th>
+                                    <th class="p-2">টাকা</th>
+                                    <th class="p-2">TrxID</th>
+                                    <th class="p-2">স্ট্যাটাস</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminOrdersTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Core Logic -->
+    <script>
+        let db = JSON.parse(localStorage.getItem('ff_topup_db')) || {
+            password: "admin123",
+            numbers: { bKash: "01700000000", Nagad: "01800000000", Rocket: "01900000000" },
+            social: { whatsapp: "https://wa.me/8801700000000", telegram: "https://t.me/yourusername" },
+            packages: [
+                { id: 1, name: "25 Diamonds", price: 25 },
+                { id: 2, name: "50 Diamonds", price: 45 },
+                { id: 3, name: "115 Diamonds", price: 90 },
+                { id: 4, name: "240 Diamonds", price: 180 },
+                { id: 5, name: "610 Diamonds", price: 450 },
+                { id: 6, name: "Level Up Pass", price: 140 }
+            ],
+            orders: []
+        };
+
+        let selectedPackage = null;
+        let selectedMethod = null;
+
+        function renderPackages() {
+            const container = document.getElementById('packageContainer');
+            container.innerHTML = '';
+            db.packages.forEach(pkg => {
+                const isSelected = selectedPackage && selectedPackage.id === pkg.id;
+                container.innerHTML += `
+                    <div onclick="selectPkg(${pkg.id})" class="cursor-pointer border ${isSelected ? 'border-amber-500 bg-amber-500/10' : 'border-slate-800 bg-slate-950'} p-3.5 rounded-xl text-center transition hover:border-amber-500">
+                        <div class="font-bold text-sm text-amber-400">${pkg.name}</div>
+                        <div class="text-xs text-slate-400 mt-1">৳${pkg.price}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function selectPkg(id) {
+            selectedPackage = db.packages.find(p => p.id === id);
+            renderPackages();
+        }
+
+        function selectPayment(method) {
+            selectedMethod = method;
+            document.querySelectorAll('.payment-btn').forEach(btn => btn.classList.remove('border-amber-500', 'bg-amber-500/10'));
+            document.getElementById(`btn-${method}`).classList.add('border-amber-500', 'bg-amber-500/10');
+            
+            const inst = document.getElementById('paymentInstructions');
+            inst.classList.remove('hidden');
+            document.getElementById('targetNumber').innerText = db.numbers[method] || "01XXXXXXXXX";
+        }
+
+        function copyNumber() {
+            const num = document.getElementById('targetNumber').innerText;
+            navigator.clipboard.writeText(num);
+            alert("নম্বর কপি করা হয়েছে: " + num);
+        }
+
+        function submitOrder() {
+            const uid = document.getElementById('playerUid').value.trim();
+            const sender = document.getElementById('senderNumber').value.trim();
+            const trx = document.getElementById('trxId').value.trim();
+
+            if (!uid) return alert("দয়া করে আপনার গেম ইউআইডি দিন!");
+            if (!selectedPackage) return alert("দয়া করে একটি ডায়মন্ড প্যাকেজ সিলেক্ট করুন!");
+            if (!selectedMethod) return alert("দয়া করে পেমেন্ট মাধ্যম সিলেক্ট করুন!");
+            if (!sender || !trx) return alert("দয়া করে আপনার সেন্ডার নম্বর ও TrxID দিন!");
+
+            const newOrder = {
+                id: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
+                uid: uid,
+                packageName: selectedPackage.name,
+                price: selectedPackage.price,
+                method: selectedMethod,
+                sender: sender,
+                trxId: trx,
+                status: 'Pending',
+                date: new Date().toLocaleDateString()
+            };
+
+            db.orders.unshift(newOrder);
+            localStorage.setItem('ff_topup_db', JSON.stringify(db));
+
+            alert("আপনার অর্ডারটি সফলভাবে জমা হয়েছে! অর্ডার আইডি: " + newOrder.id);
+            location.reload();
+        }
+
+        function openTracker() { document.getElementById('trackerModal').classList.remove('hidden'); }
+        function closeTracker() { document.getElementById('trackerModal').classList.add('hidden'); }
+
+        function openSupportModal() {
+            document.getElementById('whatsappLink').href = db.social.whatsapp;
+            document.getElementById('telegramLink').href = db.social.telegram;
+            document.getElementById('supportModal').classList.remove('hidden');
+        }
+        function closeSupportModal() { document.getElementById('supportModal').classList.add('hidden'); }
+
+        function checkOrderStatus() {
+            const uid = document.getElementById('trackUid').value.trim();
+            const resBox = document.getElementById('trackResult');
+            resBox.innerHTML = '';
+
+            const userOrders = db.orders.filter(o => o.uid === uid);
+            if (userOrders.length === 0) {
+                resBox.innerHTML = `<p class="text-xs text-rose-400 text-center">এই ইউআইডি দিয়ে কোনো অর্ডার পাওয়া যায়নি।</p>`;
+                return;
+            }
+
+            userOrders.forEach(ord => {
+                resBox.innerHTML += `
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs space-y-1">
+                        <div class="flex justify-between"><span class="text-slate-400">প্যাকেজ:</span> <span class="font-bold text-amber-400">${ord.packageName}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">টাকা:</span> <span>৳${ord.price}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">স্ট্যাটাস:</span> <span class="font-bold ${ord.status === 'Completed' ? 'text-emerald-400' : 'text-amber-400'}">${ord.status}</span></div>
+                    </div>
+                `;
+            });
+        }
+
+        function openAdmin() { document.getElementById('adminModal').classList.remove('hidden'); }
+        function closeAdmin() { document.getElementById('adminModal').classList.add('hidden'); }
+
+        function verifyAdmin() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === (db.password || "admin123")) {
+                document.getElementById('adminLoginBox').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                loadAdminData();
+            } else {
+                alert("ভুল পাসওয়ার্ড!");
+            }
+        }
+
+        function loadAdminData() {
+            document.getElementById('statTotalOrders').innerText = db.orders.length;
+            const income = db.orders.filter(o => o.status === 'Completed').reduce((sum, o) => sum + o.price, 0);
+            document.getElementById('statTotalIncome').innerText = '৳' + income;
+            document.getElementById('statPendingOrders').innerText = db.orders.filter(o => o.status === 'Pending').length;
+
+            document.getElementById('editBkash').value = db.numbers.bKash;
+            document.getElementById('editNagad').value = db.numbers.Nagad;
+            document.getElementById('editWhatsapp').value = db.social.whatsapp;
+            document.getElementById('editTelegram').value = db.social.telegram;
+
+            // Render Package manager list inside admin
+            const pkgList = document.getElementById('adminPackageList');
+            pkgList.innerHTML = '';
+            db.packages.forEach((pkg, index) => {
+                pkgList.innerHTML += `
+                    <div class="flex items-center justify-between bg-slate-900 p-2 rounded-lg border border-slate-800 text-xs">
+                        <input type="text" value="${pkg.name}" onchange="updatePkgName(${index}, this.value)" class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 w-28">
+                        <input type="number" value="${pkg.price}" onchange="updatePkgPrice(${index}, this.value)" class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 w-16">
+                        <button onclick="deletePackage(${index})" class="bg-rose-600 hover:bg-rose-500 text-white px-2 py-1 rounded">ডিলিট</button>
+                    </div>
+                `;
+            });
+
+            const tbody = document.getElementById('adminOrdersTable');
+            tbody.innerHTML = '';
+            db.orders.forEach((ord, index) => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-900">
+                        <td class="p-2 font-mono">${ord.uid}</td>
+                        <td class="p-2">${ord.packageName}</td>
+                        <td class="p-2">৳${ord.price}</td>
+                        <td class="p-2 font-mono">${ord.trxId}</td>
+                        <td class="p-2">
+                            <select onchange="updateStatus(${index}, this.value)" class="bg-slate-900 text-slate-200 border border-slate-700 rounded p-1">
+                                <option value="Pending" ${ord.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Completed" ${ord.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updatePkgName(index, val) {
+            db.packages[index].name = val;
+            localStorage.setItem('ff_topup_db', JSON.stringify(db));
+            renderPackages();
+        }
+
+        function updatePkgPrice(index, val) {
+            db.packages[index].price = Number(val);
+            localStorage.setItem('ff_topup_db', JSON.stringify(db));
+            renderPackages();
+        }
+
+        function addNewPackage() {
+            const name = document.getElementById('newPkgName').value.trim();
+            const price = Number(document.getElementById('newPkgPrice').value);
+            if (!name || !price) return alert("সঠিক নাম ও মূল্য দিন!");
+
+            db.packages.push({ id: Date.now(), name: name, price: price });
+            localStorage.setItem('ff_topup_db', JSON.stringify(db));
+            document.getElementById('newPkgName').value = '';
+            document.getElementById('newPkgPrice').value = '';
+            loadAdminData();
+            renderPackages();
+            alert("নতুন প্যাকেজ যুক্ত হয়েছে!");
+        }
+
+        function deletePackage(index) {
+            db.packages.splice(index, 1);
+            localStorage.setItem('ff_topup_db', JSON.stringify(db));
+            loadAdminData();
+            renderPackages();
+        }
+
+        function updateStatus(index, status) {
+            db.orders[index].status = status;
+            localStorage.setItem('ff_topup_db', JSON.stringify(db));
+            loadAdminData();
+        }
+
+        function saveSettings() {
+            db.numbers.bKash = document.getElementById('editBkash').value;
+            db.numbers.Nagad = document.getElementById('editNagad').value;
+            db.social.whatsapp = document.getElementById('editWhatsapp').value;
+            db.social.telegram = document.getElementById('editTelegram').value;
+            
+            const newPass = document.getElementById('editAdminPass').value.trim();
+            if(newPass) {
+                db.password = newPass;
+                alert("পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!");
+            }
+
+            localStorage.setItem('ff_topup_db', JSON.stringify(db));
+            alert("সেটিংস সফলভাবে আপডেট হয়েছে!");
+        }
+
+        renderPackages();
+    </script>
+</body>
+</html>
